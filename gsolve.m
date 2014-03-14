@@ -48,3 +48,4 @@ end
 x = A\b;
 g = x(1:n);
 lE = x(n+1:size(x,1));
+end

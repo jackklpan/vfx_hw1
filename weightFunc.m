@@ -1,6 +1,6 @@
 function [ weight ] = weightFunc( input )
-  zmin = 0;
-  zmax = 255;
+  zmin = 1;
+  zmax = 256;
   if input<=(1/2)*(zmin+zmax)
       weight = input-zmin;
   else

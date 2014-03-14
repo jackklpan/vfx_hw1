@@ -1,9 +1,12 @@
 %%
 
 files = dir('./images/*.png');
-Z = [];
-denseX = 17; % vertical
-denseY = 13; % horizontal
+
+Z1 = [];
+Z2 = [];
+Z3 = [];
+denseX = 37; % vertical
+denseY = 31; % horizontal
 
 for i=1:length(files)
   pic = imread(['./images/',files(i).name]);
@@ -13,12 +16,18 @@ for i=1:length(files)
   col = int16(picSize (2) / (denseY + 1));
   
   R = [];
+  G = [];
+  B = [];
   for x = 1: denseX
       for y = 1: denseY
           R = [R; pic(x * row, y * col, 1)];
+          G = [G; pic(x * row, y * col, 2)];
+          B = [B; pic(x * row, y * col, 3)];
       end
   end
-  Z = [Z R];
+  Z1 = [Z1 R];
+  Z2 = [Z2 G];
+  Z3 = [Z3 B];
 end
 
 %%
@@ -34,4 +43,6 @@ fclose(fileID);
 
 %%
 
-[g, lnE] = gsolve (Z, shutterSpeed, 37, @weightFunc);
+[g1, lnE] = gsolve (Z1, shutterSpeed, 47, @weightFunc);
+[g2, lnE] = gsolve (Z2, shutterSpeed, 47, @weightFunc);
+[g3, lnE] = gsolve (Z3, shutterSpeed, 47, @weightFunc);
