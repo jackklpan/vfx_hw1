@@ -43,6 +43,6 @@ fclose(fileID);
 
 %%
 
-[g1, lnE] = gsolve (Z1, shutterSpeed, 47, @weightFunc);
-[g2, lnE] = gsolve (Z2, shutterSpeed, 47, @weightFunc);
-[g3, lnE] = gsolve (Z3, shutterSpeed, 47, @weightFunc);
+[g1, lnE] = gsolve (Z1, shutterSpeed, 47, @logFunc);
+[g2, lnE] = gsolve (Z2, shutterSpeed, 47, @logFunc);
+[g3, lnE] = gsolve (Z3, shutterSpeed, 47, @logFunc);

@@ -2,9 +2,9 @@ function [ weight ] = weightFunc( input )
   zmin = 1;
   zmax = 256;
   if input<=(1/2)*(zmin+zmax)
-      weight = input-zmin;
+      weight = log (double(input - zmin + exp(1)));
   else
-      weight = zmax-input;
+      weight = log (double(zmax - input + exp(1)));
   end
 end
 
