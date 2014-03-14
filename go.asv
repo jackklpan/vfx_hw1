@@ -19,4 +19,3 @@ fclose(fileID);
 
 %%
 
-[g, lnE] = gsolve (Z, shutterSpeed, 37, @weightFunc);
