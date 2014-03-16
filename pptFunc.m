@@ -2,9 +2,9 @@ function [ weight ] = pptFunc( input )
   zmin = 1;
   zmax = 256;
   if input<=(1/2)*(zmin+zmax)
-      weight = input - zmin+1;
+      weight = double(input - zmin+1).^2;
   else
-      weight = zmax - input+1;
+      weight = double(zmax - input+1).^2;
   end
 end
 

@@ -5,24 +5,26 @@ files = dir('./images/*.png');
 Z1 = [];
 Z2 = [];
 Z3 = [];
-denseX = 10; % vertical
-denseY = 10; % horizontal
+denseX = 37; % vertical
+denseY = 31; % horizontal
 
 for i=1:length(files)
   pic = imread(['./images/',files(i).name]);
   picSize = size (pic);
   
-  row = int16(picSize (1) / (denseX + 1));
-  col = int16(picSize (2) / (denseY + 1));
+  xOffset = int16(picSize(1) / 8);
+  yOffset = int16(picSize(2) / 8);  
+  row = int16((picSize(1) - 2 * xOffset) / (denseX + 1));
+  col = int16((picSize(2) - 2 * yOffset) / (denseY + 1));
   
   R = [];
   G = [];
   B = [];
   for x = 1: denseX
       for y = 1: denseY
-          R = [R; pic(x * row, y * col, 1)];
-          G = [G; pic(x * row, y * col, 2)];
-          B = [B; pic(x * row, y * col, 3)];
+          R = [R; pic(xOffset + x * row, yOffset + y * col, 1)];
+          G = [G; pic(xOffset + x * row, yOffset +y * col, 2)];
+          B = [B; pic(xOffset + x * row, yOffset +y * col, 3)];
       end
   end
   Z1 = [Z1 R];
@@ -43,28 +45,30 @@ fclose(fileID);
 
 %%
 
-[g1, lnE] = gsolve (Z1, shutterSpeed, 47, @logFunc);
-[g2, lnE] = gsolve (Z2, shutterSpeed, 47, @logFunc);
-[g3, lnE] = gsolve (Z3, shutterSpeed, 47, @logFunc);
+[g1, lnE] = gsolve (Z1, shutterSpeed, 47, @pptFunc);
+[g2, lnE] = gsolve (Z2, shutterSpeed, 47, @pptFunc);
+[g3, lnE] = gsolve (Z3, shutterSpeed, 47, @pptFunc);
+
+tmpR = zeros(picSize(1), picSize(2));
+tmpG = zeros(picSize(1), picSize(2));
+tmpB = zeros(picSize(1), picSize(2));
+
+weightR = zeros(picSize(1), picSize(2));
+weightG = zeros(picSize(1), picSize(2));
+weightB = zeros(picSize(1), picSize(2));
 
 for i=1:length(files)
     pic = imread(['./images/',files(i).name]);
     picSize = size (pic);
     
-    tmpR = zeros(picSize(1), picSize(2));
-    tmpR = tmpR + logFunc( pic(:,:,1)+1) .* ( g1(pic(:,:,1)+1)-shutterSpeed(1, i) );
-    weightR = zeros(picSize(1), picSize(2));
-    weightR = weightR + logFunc( pic(:,:,1)+1 );
+    tmpR = tmpR + pptFunc( pic(:,:,1)+1) .* ( g1(pic(:,:,1)+1)-shutterSpeed(1, i) );
+    weightR = weightR + pptFunc( pic(:,:,1)+1 );
     
-    tmpG = zeros(picSize(1), picSize(2));
-    tmpG = tmpG + logFunc( pic(:,:,2)+1) .* ( g2(pic(:,:,2)+1)-shutterSpeed(1, i) );
-    weightG = zeros(picSize(1), picSize(2));
-    weightG = weightG + logFunc( pic(:,:,2)+1);
+    tmpG = tmpG + pptFunc( pic(:,:,2)+1) .* ( g2(pic(:,:,2)+1)-shutterSpeed(1, i) );
+    weightG = weightG + pptFunc( pic(:,:,2)+1);
     
-    tmpB = zeros(picSize(1), picSize(2));
-    tmpB = tmpB + logFunc( pic(:,:,3)+1) .* ( g3(pic(:,:,3)+1)-shutterSpeed(1, i) );
-    weightB = zeros(picSize(1), picSize(2));
-    weightB = weightB + logFunc( pic(:,:,3)+1);
+    tmpB = tmpB + pptFunc( pic(:,:,3)+1) .* ( g3(pic(:,:,3)+1)-shutterSpeed(1, i) );
+    weightB = weightB + pptFunc( pic(:,:,3)+1);
     
 end
 
