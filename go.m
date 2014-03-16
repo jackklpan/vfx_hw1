@@ -5,8 +5,8 @@ files = dir('./images/*.png');
 Z1 = [];
 Z2 = [];
 Z3 = [];
-denseX = 37; % vertical
-denseY = 31; % horizontal
+denseX = 10; % vertical
+denseY = 10; % horizontal
 
 for i=1:length(files)
   pic = imread(['./images/',files(i).name]);
@@ -46,3 +46,28 @@ fclose(fileID);
 [g1, lnE] = gsolve (Z1, shutterSpeed, 47, @logFunc);
 [g2, lnE] = gsolve (Z2, shutterSpeed, 47, @logFunc);
 [g3, lnE] = gsolve (Z3, shutterSpeed, 47, @logFunc);
+
+for i=1:length(files)
+    pic = imread(['./images/',files(i).name]);
+    picSize = size (pic);
+    
+    tmpR = zeros(picSize(1), picSize(2));
+    tmpR = tmpR + logFunc( pic(:,:,1)+1) .* ( g1(pic(:,:,1)+1)-shutterSpeed(1, i) );
+    weightR = zeros(picSize(1), picSize(2));
+    weightR = weightR + logFunc( pic(:,:,1)+1 );
+    
+    tmpG = zeros(picSize(1), picSize(2));
+    tmpG = tmpG + logFunc( pic(:,:,2)+1) .* ( g2(pic(:,:,2)+1)-shutterSpeed(1, i) );
+    weightG = zeros(picSize(1), picSize(2));
+    weightG = weightG + logFunc( pic(:,:,2)+1);
+    
+    tmpB = zeros(picSize(1), picSize(2));
+    tmpB = tmpB + logFunc( pic(:,:,3)+1) .* ( g3(pic(:,:,3)+1)-shutterSpeed(1, i) );
+    weightB = zeros(picSize(1), picSize(2));
+    weightB = weightB + logFunc( pic(:,:,3)+1);
+    
+end
+
+tmpR = tmpR./weightR;
+tmpG = tmpG./weightG;
+tmpB = tmpB./weightB;

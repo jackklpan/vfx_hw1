@@ -1,4 +1,4 @@
-function [ weight ] = weightFunc( input )
+function [ weight ] = logFunc( input )
   zmin = 1;
   zmax = 256;
   if input<=(1/2)*(zmin+zmax)
