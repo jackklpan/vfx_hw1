@@ -49,3 +49,34 @@ fclose(fileID);
 [g2, lnE] = gsolve (Z2, shutterSpeed, 47, @pptFunc);
 [g3, lnE] = gsolve (Z3, shutterSpeed, 47, @pptFunc);
 
+tmpR = zeros(picSize(1), picSize(2));
+tmpG = zeros(picSize(1), picSize(2));
+tmpB = zeros(picSize(1), picSize(2));
+
+weightR = zeros(picSize(1), picSize(2));
+weightG = zeros(picSize(1), picSize(2));
+weightB = zeros(picSize(1), picSize(2));
+
+for i=1:length(files)
+    pic = imread(['./images/',files(i).name]);
+    picSize = size (pic);
+    
+    tmpR = tmpR + pptFunc( pic(:,:,1)+1) .* ( g1(pic(:,:,1)+1)-shutterSpeed(1, i) );
+    weightR = weightR + pptFunc( pic(:,:,1)+1 );
+    
+    tmpG = tmpG + pptFunc( pic(:,:,2)+1) .* ( g2(pic(:,:,2)+1)-shutterSpeed(1, i) );
+    weightG = weightG + pptFunc( pic(:,:,2)+1);
+    
+    tmpB = tmpB + pptFunc( pic(:,:,3)+1) .* ( g3(pic(:,:,3)+1)-shutterSpeed(1, i) );
+    weightB = weightB + pptFunc( pic(:,:,3)+1);
+    
+end
+
+tmpR = tmpR./weightR;
+tmpG = tmpG./weightG;
+tmpB = tmpB./weightB;
+
+HDRpic(:,:,1) = tmpR;
+HDRpic(:,:,2) = tmpG;
+HDRpic(:,:,3) = tmpB;
+HDRpic = exp(HDRpic);
