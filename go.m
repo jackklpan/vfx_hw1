@@ -48,7 +48,7 @@ fclose(fileID);
 [g1, lnE] = gsolve (Z1, shutterSpeed, 47, @pptFunc);
 [g2, lnE] = gsolve (Z2, shutterSpeed, 47, @pptFunc);
 [g3, lnE] = gsolve (Z3, shutterSpeed, 47, @pptFunc);
-
+  
 tmpR = zeros(picSize(1), picSize(2));
 tmpG = zeros(picSize(1), picSize(2));
 tmpB = zeros(picSize(1), picSize(2));
