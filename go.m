@@ -71,3 +71,8 @@ end
 tmpR = tmpR./weightR;
 tmpG = tmpG./weightG;
 tmpB = tmpB./weightB;
+
+HDRpic(:,:,1) = tmpR;
+HDRpic(:,:,2) = tmpG;
+HDRpic(:,:,3) = tmpB;
+HDRpic = exp(HDRpic);
