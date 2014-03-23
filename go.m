@@ -1,6 +1,6 @@
 %%
 
-files = dir('./exposures/*.jpg');
+files = dir('./images/*.png');
 
 Z1 = [];
 Z2 = [];
@@ -9,7 +9,7 @@ denseX = 37; % vertical
 denseY = 31; % horizontal
 
 for i=1:length(files)
-  pic = imread(['./exposures/',files(i).name]);
+  pic = imread(['./images/',files(i).name]);
   picSize = size (pic);
   
   xOffset = int16(picSize(1) / 8);
@@ -34,7 +34,7 @@ end
 
 %%
 
-fileID = fopen ('./exposures/exposures1.txt');
+fileID = fopen ('./images/exposures1.txt');
 expo = textscan (fileID, '%f');
 expo = expo{1,1};
 shutterSpeed = reshape (log (1 ./ expo), 1, length(expo));
@@ -58,7 +58,7 @@ weightG = zeros(picSize(1), picSize(2));
 weightB = zeros(picSize(1), picSize(2));
 
 for i=1:length(files)
-    pic = imread(['./exposures/',files(i).name]);
+    pic = imread(['./images/',files(i).name]);
     picSize = size (pic);
     
     tmpR = tmpR + pptFunc( pic(:,:,1)+1) .* ( g1(pic(:,:,1)+1)-shutterSpeed(1, i) );
