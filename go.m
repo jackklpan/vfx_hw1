@@ -3,7 +3,7 @@ clear all;
 %params
 do_alignment = true;
 
-file_path = './test/';
+file_path = './exposures/';
 image_name = '*.jpg';
 exposure_file_name = 'exposures1.txt';
 
