@@ -1,15 +1,69 @@
+clear all;
 %%
+%params
+do_alignment = true;
 
-files = dir('./images/*.png');
+file_path = './test/';
+image_name = '*.jpg';
+exposure_file_name = 'exposures1.txt';
 
-Z1 = [];
-Z2 = [];
-Z3 = [];
+%%
+%init
+files = dir([file_path, image_name]);
+
+%%
+%alignment images
+if(do_alignment)
+  img1_for_alignment = rgb2gray(imread([file_path, files(1).name]));
+  img2_for_alignment = rgb2gray(imread([file_path, files(2).name]));
+    
+  fprintf('alignment for image 2\n');
+  multi_scale = int32(log2( max( size(img1_for_alignment) ) )) - 5;
+  tolerance = 10;
+  shift = [0 0; alignment(img1_for_alignment, img2_for_alignment, multi_scale, tolerance)];
+    
+  for i=3:length(files)
+      fprintf('alignment for image %d\n', i);
+        
+      img1_for_alignment = img2_for_alignment;
+      img2_for_alignment = rgb2gray(imread([file_path, files(i).name]));
+        
+      %local shift is the shift between last images and this images, shift is
+      %the shift between first images and this images
+      shift_local = alignment(img1_for_alignment, img2_for_alignment, multi_scale, tolerance);
+      last_shift = shift(i-1,:);
+      shift = [ shift; [last_shift(1)+shift_local(1) last_shift(2)+shift_local(2)] ];
+  end
+  
+  max_x = (max(shift(:,1))>0).*max(shift(:,1)); % >0 is max, otherwise is 0
+  min_x = (min(shift(:,1))<0).*min(shift(:,1));
+  max_y = (max(shift(:,2))>0).*max(shift(:,2));
+  min_y = (min(shift(:,2))<0).*min(shift(:,2));
+  for i=1:length(files)
+      origin_pic = imread([file_path, files(i).name]);
+      now_shift = shift(i,:);
+      T = maketform('affine', [1 0 0; 0 1 0; now_shift(1) now_shift(2) 1]);
+      pic_alignment_tmp = imtransform(origin_pic, T, 'XData',[1 size(origin_pic,2)], 'YData',[1 size(origin_pic,1)]);
+      picSize = size(pic_alignment_tmp);
+      pic_alignment(:,:,:,i) = imcrop(pic_alignment_tmp, [max_x, max_y, picSize(2)+min_x, picSize(1)+min_y]);
+  end
+  
+else
+  for i=1:length(files)
+    pic_alignment(:,:,:,i) = imread([file_path, files(i).name]);
+  end
+end
+
+%%
+%get intensity value from image samples
+Z1 = []; %intensity for R
+Z2 = []; %intensity for G
+Z3 = []; %intensity for B
 denseX = 37; % vertical
 denseY = 31; % horizontal
 
 for i=1:length(files)
-  pic = imread(['./images/',files(i).name]);
+  pic = pic_alignment(:,:,:,i);
   picSize = size (pic);
   
   xOffset = int16(picSize(1) / 8);
@@ -33,8 +87,8 @@ for i=1:length(files)
 end
 
 %%
-
-fileID = fopen ('./images/exposures1.txt');
+%get shutterSpeed from file
+fileID = fopen ([file_path, exposure_file_name]);
 expo = textscan (fileID, '%f');
 expo = expo{1,1};
 shutterSpeed = reshape (log (1 ./ expo), 1, length(expo));
@@ -44,11 +98,13 @@ end
 fclose(fileID);
 
 %%
-
+%solve least-square function
 [g1, lnE] = gsolve (Z1, shutterSpeed, 47, @pptFunc);
 [g2, lnE] = gsolve (Z2, shutterSpeed, 47, @pptFunc);
 [g3, lnE] = gsolve (Z3, shutterSpeed, 47, @pptFunc);
-  
+
+%%
+%weight average the hdr image from all images and g functions
 tmpR = zeros(picSize(1), picSize(2));
 tmpG = zeros(picSize(1), picSize(2));
 tmpB = zeros(picSize(1), picSize(2));
@@ -58,7 +114,7 @@ weightG = zeros(picSize(1), picSize(2));
 weightB = zeros(picSize(1), picSize(2));
 
 for i=1:length(files)
-    pic = imread(['./images/',files(i).name]);
+    pic = pic_alignment(:,:,:,i);
     picSize = size (pic);
     
     tmpR = tmpR + pptFunc( pic(:,:,1)+1) .* ( g1(pic(:,:,1)+1)-shutterSpeed(1, i) );
