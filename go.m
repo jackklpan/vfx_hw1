@@ -88,6 +88,7 @@ end
 
 %%
 %get shutterSpeed from file
+%{
 fileID = fopen ([file_path, exposure_file_name]);
 expo = textscan (fileID, '%f');
 expo = expo{1,1};
@@ -96,6 +97,17 @@ for i = 2: denseX * denseY
     shutterSpeed(i, :) = shutterSpeed(1, :);
 end
 fclose(fileID);
+%}
+
+shutterSpeed = [];
+for i=1:length(files)
+  pic_info = imfinfo([file_path, files(i).name]);
+  exposure_time = pic_info.DigitalCamera.ExposureTime;
+  shutterSpeed = [shutterSpeed log(exposure_time)];
+end
+for i = 2: denseX * denseY
+    shutterSpeed(i, :) = shutterSpeed(1, :);
+end
 
 %%
 %solve least-square function
