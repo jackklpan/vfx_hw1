@@ -3,7 +3,7 @@ clear all;
 %params
 do_alignment = true;
 
-file_path = './exposures/';
+file_path = './test_case2/';
 image_name = '*.jpg';
 output_file_path = './output_clip/';
 exposure_file_name = 'exposures1.txt';
@@ -48,20 +48,24 @@ if(do_alignment)
       picSize = size(pic_alignment_tmp);
       pic_alignment(:,:,:,i) = imcrop(pic_alignment_tmp, [max_x, max_y, picSize(2)+min_x, picSize(1)+min_y]);
   end
-  %write clip image to disk
-  if ~exist(output_file_path, 'dir')
-      mkdir(output_file_path);
-  end
-  for i=1:length(files)
-      imwrite(pic_alignment(:,:,:,i) ,[output_file_path, files(i).name]);
-  end
-  files = dir([output_file_path, image_name]);
   
 else
   for i=1:length(files)
     pic_alignment(:,:,:,i) = imread([file_path, files(i).name]);
   end
 end
+
+%write clip image to disk
+if ~exist(output_file_path, 'dir')
+    mkdir(output_file_path);
+else
+    rmdir(output_file_path, 's');
+    mkdir(output_file_path);
+end
+for i=1:length(files)
+    imwrite(pic_alignment(:,:,:,i) ,[output_file_path, files(i).name]);
+end
+files = dir([output_file_path, image_name]);
 
 clear pic_alignment;
 clear pic_alignment_tmp;
@@ -77,7 +81,7 @@ denseX = 37; % vertical
 denseY = 31; % horizontal
 
 for i=1:length(files)
-  pic = imread([file_path, files(i).name]);
+  pic = imread([output_file_path, files(i).name]);
   picSize = size (pic);
   
   xOffset = int16(picSize(1) / 8);
@@ -115,7 +119,7 @@ fclose(fileID);
 
 shutterSpeed = [];
 for i=1:length(files)
-  pic_info = imfinfo([file_path, files(i).name]);
+  pic_info = imfinfo([output_file_path, files(i).name]);
   exposure_time = pic_info.DigitalCamera.ExposureTime;
   shutterSpeed = [shutterSpeed log(exposure_time)];
 end
@@ -140,7 +144,7 @@ weightG = zeros(picSize(1), picSize(2));
 weightB = zeros(picSize(1), picSize(2));
 
 for i=1:length(files)
-    pic = imread([file_path, files(i).name]);
+    pic = imread([output_file_path, files(i).name]);
     picSize = size (pic);
     
     tmpR = tmpR + pptFunc( pic(:,:,1)+1) .* ( g1(pic(:,:,1)+1)-shutterSpeed(1, i) );
