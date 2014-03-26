@@ -3,7 +3,7 @@ function [TMpic_global, TMpic_local] = tonemap_photo( HDRpic )
 
 %% parameters
 a = 0.5;
-L_white = 3;
+%L_white = 3;
 epsilon = 0.01;
 phi = 15;
 gauss_min = 0.000000001;
@@ -18,7 +18,7 @@ sizeL = size (L);
 
 L_w = exp (sum (sum (log (0.001 + L))) / (sizeL(1) * sizeL(2)));
 L_m = (a / L_w) * L;
-%L_white = max (max (L_m));
+L_white = max (max (L_m));
 L_d = L_m .* (1 + L_m / (L_white^2)) ./ (1 + L_m);
 
 ratio = L_d ./ L;
@@ -28,21 +28,20 @@ TMpic_global(:, :, 3) = ratio .* HDRpic(:, :, 3);
 
 %% Local Operator (L_d as input)
 
+s = 1.6 ^ -4;
 win1 = 1;
 win2 = 1;
-i = 1;
 
 L_d2 = zeros (sizeL(1), sizeL(2));
 not_done = zeros (sizeL(1), sizeL(2)) + 1;
 
-while sum (sum (not_done)) > sizeL(1) * sizeL(2) * 0.01
+while (s < min(sizeL)) && ((sum (sum (not_done)) > sizeL(1) * sizeL(2) * 0.01))
     
-    s = 1.6 ^ (i - 1);
-    i = i + 1;
+    s = 1.6 * s;
     
     %G = fspecial ('gaussian',  [win1 win1], 0.25 * s);
     G = makeG (win1, s, 0.35);
-    while G(1, 1) > gauss_min
+    while G(1, 1) > gauss_min && win1 < min(sizeL)
         win1 = win1 + 2;
         %G = fspecial ('gaussian',  [win1 win1], 0.25 * s);
         G = makeG (win1, s, 0.35);
@@ -51,7 +50,7 @@ while sum (sum (not_done)) > sizeL(1) * sizeL(2) * 0.01
     
     %G = fspecial ('gaussian',  [win2 win2], 1.6 * 1.6 * 0.25 * s);
     G = makeG (win2, s, cent_sur_ratio * 0.35);
-    while G(1, 1) > gauss_min
+    while (G(1, 1) > gauss_min) && win2 < min(sizeL)
         win2 = win2 + 2;
         %G = fspecial ('gaussian',  [win2 win2], 1.6 * 1.6 * 0.25 * s);
         G = makeG (win2, s, cent_sur_ratio * 0.35);
