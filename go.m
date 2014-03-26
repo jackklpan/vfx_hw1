@@ -3,7 +3,7 @@ clear all;
 %params
 do_alignment = true;
 
-file_path = './test_case2/';
+file_path = './exposures/';
 image_name = '*.jpg';
 output_file_path = './output_clip/';
 exposure_file_name = 'exposures1.txt';
@@ -119,7 +119,7 @@ fclose(fileID);
 
 shutterSpeed = [];
 for i=1:length(files)
-  pic_info = imfinfo([output_file_path, files(i).name]);
+  pic_info = imfinfo([file_path, files(i).name]);
   exposure_time = pic_info.DigitalCamera.ExposureTime;
   shutterSpeed = [shutterSpeed log(exposure_time)];
 end
