@@ -5,6 +5,7 @@ do_alignment = true;
 
 file_path = './exposures/';
 image_name = '*.jpg';
+output_file_path = './output_clip/';
 exposure_file_name = 'exposures1.txt';
 
 %%
@@ -47,6 +48,14 @@ if(do_alignment)
       picSize = size(pic_alignment_tmp);
       pic_alignment(:,:,:,i) = imcrop(pic_alignment_tmp, [max_x, max_y, picSize(2)+min_x, picSize(1)+min_y]);
   end
+  %write clip image to disk
+  if ~exist(output_file_path, 'dir')
+      mkdir(output_file_path);
+  end
+  for i=1:length(files)
+      imwrite(pic_alignment(:,:,:,i) ,[output_file_path, files(i).name]);
+  end
+  files = dir([output_file_path, image_name]);
   
 else
   for i=1:length(files)
@@ -54,6 +63,11 @@ else
   end
 end
 
+clear pic_alignment;
+clear pic_alignment_tmp;
+clear img1_for_alignment;
+clear img2_for_alignment;
+clear origin_pic;
 %%
 %get intensity value from image samples
 Z1 = []; %intensity for R
@@ -63,7 +77,7 @@ denseX = 37; % vertical
 denseY = 31; % horizontal
 
 for i=1:length(files)
-  pic = pic_alignment(:,:,:,i);
+  pic = imread([file_path, files(i).name]);
   picSize = size (pic);
   
   xOffset = int16(picSize(1) / 8);
@@ -126,7 +140,7 @@ weightG = zeros(picSize(1), picSize(2));
 weightB = zeros(picSize(1), picSize(2));
 
 for i=1:length(files)
-    pic = pic_alignment(:,:,:,i);
+    pic = imread([file_path, files(i).name]);
     picSize = size (pic);
     
     tmpR = tmpR + pptFunc( pic(:,:,1)+1) .* ( g1(pic(:,:,1)+1)-shutterSpeed(1, i) );
