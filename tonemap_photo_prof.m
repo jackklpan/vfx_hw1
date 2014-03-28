@@ -3,9 +3,9 @@ function [TMpic_global, TMpic_local] = tonemap_photo_prof( HDRpic )
 
 %% parameters
 a = 0.5;
-L_white =0.3;
-epsilon = 0.1;
-phi = 15;
+L_white =1000;
+epsilon = 0.001;
+phi = 25;
 
 L = 0.27 * HDRpic(:, :, 1) + 0.67 * HDRpic(:, :, 2) + 0.6 * HDRpic(:, :, 3);
 sizeL = size (L);
@@ -45,7 +45,7 @@ while (G(1, 1) > gauss_min) && win < min(sizeL)
 end
 L_blur_s1 = imfilter(L_d, G);
 
-while (s < min(sizeL)) && ((sum (sum (not_done)) > sizeL(1) * sizeL(2) * 0.01))
+while (s < min(sizeL)) && ((sum (sum (not_done)) > sizeL(1) * sizeL(2) * 0.01)) %&& i < 8
     
     i = i + 1;
     s = (1.6 ^ i ) * init;
