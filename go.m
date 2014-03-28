@@ -1,10 +1,10 @@
 clear all;
 %%
 %params
-do_alignment = true;
+do_alignment = false;
 
-file_path = './exposures/';
-image_name = '*.jpg';
+file_path = './test_case_park/';
+image_name = '*.png';
 output_file_path = './output_clip/';
 exposure_file_name = 'exposures1.txt';
 
@@ -78,7 +78,7 @@ Z1 = []; %intensity for R
 Z2 = []; %intensity for G
 Z3 = []; %intensity for B
 denseX = 37; % vertical
-denseY = 31; % horizontal
+denseY = 41; % horizontal
 
 for i=1:length(files)
   pic = imread([output_file_path, files(i).name]);
@@ -106,7 +106,7 @@ end
 
 %%
 %get shutterSpeed from file
-%{
+
 fileID = fopen ([file_path, exposure_file_name]);
 expo = textscan (fileID, '%f');
 expo = expo{1,1};
@@ -115,8 +115,8 @@ for i = 2: denseX * denseY
     shutterSpeed(i, :) = shutterSpeed(1, :);
 end
 fclose(fileID);
-%}
 
+%{
 shutterSpeed = [];
 for i=1:length(files)
   pic_info = imfinfo([file_path, files(i).name]);
@@ -126,7 +126,7 @@ end
 for i = 2: denseX * denseY
     shutterSpeed(i, :) = shutterSpeed(1, :);
 end
-
+%}
 %%
 %solve least-square function
 [g1, lnE] = gsolve (Z1, shutterSpeed, 47, @pptFunc);

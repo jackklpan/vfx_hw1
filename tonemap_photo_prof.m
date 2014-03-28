@@ -1,13 +1,11 @@
-function [TMpic_global, TMpic_local] = tonemap_photo( HDRpic )
+function [TMpic_global, TMpic_local] = tonemap_photo_prof( HDRpic )
 %% color pre-process  (try to find a way that wont have weird single color)
 
 %% parameters
 a = 0.5;
-L_white = 3;
+L_white =0.3;
 epsilon = 0.1;
-phi = 5;
-gauss_min = 0.000000001;
-cent_sur_ratio = 1.2;
+phi = 15;
 
 L = 0.27 * HDRpic(:, :, 1) + 0.67 * HDRpic(:, :, 2) + 0.6 * HDRpic(:, :, 3);
 sizeL = size (L);
@@ -15,9 +13,10 @@ sizeL = size (L);
 
 %% Global Operator
 
-L_w = exp (sum (sum (log (0.00000001 + L))) / (sizeL(1) * sizeL(2)));
+L_w = exp (sum (sum (log10 (0.00000001 + L))) / (sizeL(1) * sizeL(2)));
 L_m = (a / L_w) * L;
 %L_white = max (max (L_m));
+%L_m = (L_m < L_white) .* L_m + (L_m >= L_white) .* L_white;
 L_d = L_m .* (1 + L_m / (L_white^2)) ./ (1 + L_m);
 
 ratio = L_d ./ L;
@@ -27,33 +26,34 @@ TMpic_global(:, :, 3) = ratio .* HDRpic(:, :, 3);
 TMpic_global = (TMpic_global >= 1) .* 1 + (TMpic_global < 1) .* TMpic_global;
 
 %% Local Operator (L_d as input)
+L_d = L_m;
 
-s = cent_sur_ratio ^ -4;
-win1 = 1;
-win2 = 1;
+i = 0;
+init = 1;
+s = (1.6 ^ i ) * init;
+win = 1;
+gauss_min = 0.000000001;
+sig = 0.35;
 
 L_d2 = zeros (sizeL(1), sizeL(2));
 not_done = zeros (sizeL(1), sizeL(2)) + 1;
 
+G = makeG (win, s, sig);
+while (G(1, 1) > gauss_min) && win < min(sizeL)
+    win = win + 2;
+    G = makeG (win, s, sig);
+end
+L_blur_s1 = imfilter(L_d, G);
+
 while (s < min(sizeL)) && ((sum (sum (not_done)) > sizeL(1) * sizeL(2) * 0.01))
     
-    s = cent_sur_ratio * s;
+    i = i + 1;
+    s = (1.6 ^ i ) * init;
     
-    %G = fspecial ('gaussian',  [win1 win1], 0.25 * s);
-    G = makeG (win1, s, 0.35);
-    while G(1, 1) > gauss_min && win1 < min(sizeL)
-        win1 = win1 + 2;
-        %G = fspecial ('gaussian',  [win1 win1], 0.25 * s);
-        G = makeG (win1, s, 0.35);
-    end
-    L_blur_s1 = imfilter(L_d, G);
-    
-    %G = fspecial ('gaussian',  [win2 win2], 1.6 * 1.6 * 0.25 * s);
-    G = makeG (win2, s, cent_sur_ratio * 0.35);
-    while (G(1, 1) > gauss_min) && win2 < min(sizeL)
-        win2 = win2 + 2;
-        %G = fspecial ('gaussian',  [win2 win2], 1.6 * 1.6 * 0.25 * s);
-        G = makeG (win2, s, cent_sur_ratio * 0.35);
+    G = makeG (win, s, sig);
+    while (G(1, 1) > gauss_min) && win < min(sizeL)
+        win = win + 2;
+        G = makeG (win, s, sig);
     end
     L_blur_s2 = imfilter(L_d, G);
     
@@ -68,6 +68,7 @@ while (s < min(sizeL)) && ((sum (sum (not_done)) > sizeL(1) * sizeL(2) * 0.01))
 
     s
     sum(sum(not_done))
+    
 end
 
 if ~isempty(not_done)
@@ -81,6 +82,7 @@ TMpic_local(:, :, 1) = ratio .* HDRpic(:, :, 1);
 TMpic_local(:, :, 2) = ratio .* HDRpic(:, :, 2);
 TMpic_local(:, :, 3) = ratio .* HDRpic(:, :, 3);
 TMpic_local = (TMpic_local >= 1) .* 1 + (TMpic_local < 1) .* TMpic_local;
+figure
 imshow(TMpic_local);
 
 end
