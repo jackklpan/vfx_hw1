@@ -3,10 +3,10 @@ function TMpic = tonemap_photo_prof_mix (HDRpic)
 %  
 
 %% parameters
-a = 2.3;
-L_white =0.68; % set to -1, if you want to use the max intensity as L_white
-epsilon = 0.0002;
-phi = 13;
+a = 2;
+L_white =0.8; % set to -1, if you want to use the max intensity as L_white
+epsilon = 0.005;
+phi = 10;
 init = 0.25;
 i = 0;
 s = (1.6 ^ i ) * init;

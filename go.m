@@ -3,8 +3,8 @@ clear all;
 %params
 do_alignment = false;
 
-file_path = './final/';
-image_name = '*.jpg';
+file_path = './exposures/';
+image_name = '*.png';
 output_file_path = './output_clip/';
 exposure_file_name = 'exposures1.txt';
 
