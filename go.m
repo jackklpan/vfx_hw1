@@ -73,6 +73,7 @@ clear img1_for_alignment;
 clear img2_for_alignment;
 clear origin_pic;
 %%
+
 %get intensity value from image samples
 Z1 = []; %intensity for R
 Z2 = []; %intensity for G
@@ -167,4 +168,5 @@ HDRpic(:,:,2) = tmpG;
 HDRpic(:,:,3) = tmpB;
 HDRpic = exp(HDRpic);
 
-clearvars  -except HDRpic g1 g2 g3;
+hdrwrite(HDRpic, [output_file_path, 'hdrResult.hdr']);
+clearvars  -except HDRpic g1 g2 g3 output_file_path;
