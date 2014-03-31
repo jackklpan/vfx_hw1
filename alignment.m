@@ -25,7 +25,7 @@ function [shift_ref_output] = alignment( img1, img2, shift_bits, tolerance )
       for j=-1:1
           xs = cur_shift(1)+i;
           ys = cur_shift(2)+j;
-          T = maketform('affine', [1 0 0; 0 1 0; i j 1]);
+          T = maketform('affine', [1 0 0; 0 1 0; xs ys 1]);
           img2_shift_thresholding = imtransform(img2_thresholding, T, 'XData',[1 size(img2_thresholding,2)], 'YData',[1 size(img2_thresholding,1)]);
           img2_shift_exclusion = imtransform(img2_exclusion, T, 'XData',[1 size(img2_exclusion,2)], 'YData',[1 size(img2_exclusion,1)]);
           diff_b = xor(img1_thresholding, img2_shift_thresholding);
@@ -65,7 +65,7 @@ function [upper_bound1, lower_bound1, thresholding1, upper_bound2, lower_bound2,
   lower_bound1 = prctile(img1(:),percent)-tolerance;
   lower_bound2 = prctile(img2(:),percent)-tolerance;
   while(lower_bound2 <= 0 && percent < 99)
-     percent = percent*2;
+     percent = percent+percent/2;
      lower_bound1 = prctile(img1(:),percent)-tolerance;
      lower_bound2 = prctile(img2(:),percent)-tolerance;
   end
